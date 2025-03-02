@@ -179,9 +179,25 @@ class Table:
 
 class User(Table):
     table_name = 'User'
+    fields = [
+        'tg_id',
+        'sex',
+        'age',
+        'region',
+        'education',
+        'work_position',
+        'date_start',
+        'date_finish'
+    ]
 
 class QuestionAbout(Table):
     table_name = 'Question_about'
+    fields = [
+        'number',
+        'column',
+        'question',
+        'answer_choise'
+    ]
 
     def select_where(self,
                      conditions_and=None,
@@ -189,15 +205,48 @@ class QuestionAbout(Table):
 
         return super().select_where(conditions_and, conditions_or)
 
+    def get_question(self, number):
+        if not isinstance(number, int):
+            return None
+        else:
+            return super().select_where(conditions_and=[('number', '=', number)])
+
 
 class QuestionTest(Table):
     table_name = 'Question_test'
+    fields = [
+        'number',
+        'question',
+        'answer_choise'
+    ]
 
 
 class AnswerTest(Table):
     table_name = 'Answer_test'
+    fields = [
+        'id',
+        'tg_id',
+        'number',
+        'answer'
+    ]
 
 
 class Admin(Table):
     table_name = 'Admin'
+    fields = [
+        'tg_id'
+    ]
+
+    def admins(self) -> list:
+        """
+        Получить список tg_id админов
+
+        :return:
+        """
+        return self.select_all()
+
+if __name__ == '__main__':
+    print(Admin().select_all())
+    print(QuestionAbout().get_question(2))
+    x = 1
 
