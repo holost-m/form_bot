@@ -47,3 +47,13 @@ async def question_test(message: Message):
     await message.answer(
         text='Пользовательский вопрос'
     )
+
+@router.message()
+async def get_user_result(message: Message):
+    """
+    Возвращает пользователю результат прохождения теста
+    """
+
+    await message.answer(
+        text='Результат теста'
+    )
