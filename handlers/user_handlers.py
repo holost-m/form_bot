@@ -5,6 +5,8 @@ from aiogram.filters import Command, CommandStart
 from aiogram.types import Message
 from aiogram.types import CallbackQuery
 
+from keyboards.user_keyboards import UserKeyBoardManager
+
 # Инициализируем роутер для обработки пользовательских сообщений
 router = Router()
 
@@ -26,27 +28,26 @@ async def process_start_command(message: Message):
     )
 
 @router.message()
-async def question_about(message: Message):
+async def process_question(callback: CallbackQuery):
     """
     Обрабатывает первые 5 вопросов
     с заполнением информации о пользователе
     """
+    tg_id: int = callback.message.from_user.id
+
+    # Сохранили полученный ответ
+
+    # Если надо переключили состояние
 
 
-    await message.answer(
-        text='Пользовательский вопрос'
-    )
+    # Сформировали вопрос и клавитуру
+    text, reply_markup = UserKeyBoardManager.get_keyboard()
 
 
-@router.message()
-async def question_test(message: Message):
-    """
-    Обрабатывает анкетные 6-15 вопросы
-    """
 
-    await message.answer(
-        text='Пользовательский вопрос'
-    )
+    await callback.message.answer(text=text,
+                                  reply_markup=reply_markup)
+
 
 @router.message()
 async def get_user_result(message: Message):

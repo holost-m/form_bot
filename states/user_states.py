@@ -78,5 +78,5 @@ class FSM:
         red.hset(str(tg_id), str(key), str(priority))
 
     @classmethod
-    def has_fsm(cls, tg_id) -> bool:
+    def has_state(cls, tg_id) -> bool:
         return red.exists(str(tg_id))

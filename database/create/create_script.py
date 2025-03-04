@@ -13,35 +13,17 @@ cursor = conn.cursor()
 cursor.execute('''
     CREATE TABLE IF NOT EXISTS User (
         tg_id INTEGER PRIMARY KEY,
-        sex TEXT,
-        age INTEGER,
-        region TEXT,
-        education TEXT,
-        work_position TEXT,
         date_start TEXT,  -- Дата начала работы (хранится как текст)
         date_finish TEXT  -- Дата окончания работы (хранится как текст)
     )
 ''')
 
-# Создание таблицы Question_about
-# вопросы о пользователе от 1 до 5
+# Создание таблицы Question
 cursor.execute('''
-    CREATE TABLE IF NOT EXISTS Question_about (
-        number INTEGER PRIMARY KEY, -- от 1 до 5
-        column TEXT, -- захардкоженное название колонки таблицы User
+    CREATE TABLE IF NOT EXISTS Question (
+        number INTEGER PRIMARY KEY,
         question TEXT, -- текст вопроса
-        answer_choise TEXT -- варианты ответа список
-    )
-''')
-
-
-# Создание таблицы Question_test
-# Непосредственно вопросы анекеты от 6 до 15
-cursor.execute('''
-    CREATE TABLE IF NOT EXISTS Question_test (
-        number INTEGER PRIMARY KEY, -- от 6 до 15
-        question TEXT, -- текст вопроса
-        answer_choise TEXT -- варианты ответа словарь
+        answer_choise TEXT -- варианты ответа словарь или список
     )
 ''')
 
@@ -52,9 +34,9 @@ cursor.execute('''
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         tg_id INTEGER,
         number INTEGER, 
-        answer TEXT, -- ответы в формате словаря 
+        answer TEXT, -- ответы в формате словаря или список с одной строкой
         FOREIGN KEY (tg_id) REFERENCES User(tg_id),
-        FOREIGN KEY (number) REFERENCES Question_test(number)
+        FOREIGN KEY (number) REFERENCES Question(number)
     )
 ''')
 

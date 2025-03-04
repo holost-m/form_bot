@@ -1,5 +1,6 @@
 import sqlite3
 import os
+import json
 
 DB_NAME = 'form_bot.db'
 
@@ -190,11 +191,10 @@ class User(Table):
         'date_finish'
     ]
 
-class QuestionAbout(Table):
-    table_name = 'Question_about'
+class Question(Table):
+    table_name = 'Question'
     fields = [
         'number',
-        'column',
         'question',
         'answer_choise'
     ]
@@ -209,16 +209,12 @@ class QuestionAbout(Table):
         if not isinstance(number, int):
             return None
         else:
-            return super().select_where(conditions_and=[('number', '=', number)])
+            question: dict = super().select_where(
+                conditions_and=[('number', '=', number)]
+            )[0]
+            # Формат словаря или списка
+            question['answer_choise'] = json.loads(question['answer_choise'])
 
-
-class QuestionTest(Table):
-    table_name = 'Question_test'
-    fields = [
-        'number',
-        'question',
-        'answer_choise'
-    ]
 
 
 class AnswerTest(Table):
@@ -229,6 +225,15 @@ class AnswerTest(Table):
         'number',
         'answer'
     ]
+
+    def get_last_answer(self, tg_id):
+        sql = f"""
+        SELECT MAX("number") AS max_number
+        FROM {self.table_name}
+        WHERE "tg_id" = ?
+        """
+        result = executor(sql, (tg_id,))
+        return result[0]['max_number'] if result else None
 
 
 class Admin(Table):
@@ -247,6 +252,6 @@ class Admin(Table):
 
 if __name__ == '__main__':
     print(Admin().select_all())
-    print(QuestionAbout().get_question(2))
+    print(Question().get_question(2))
     x = 1
 
