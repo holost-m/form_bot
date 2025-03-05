@@ -3,6 +3,7 @@
 """
 
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+import random
 
 from database.db_operations import (User,
                                     Question,
@@ -57,6 +58,19 @@ class UserKeyBoardManager:
                 callback_data=str(priority)
             )
             buttons.append([button])
+
+        return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+    @classmethod
+    def result(cls) -> InlineKeyboardMarkup:
+        """
+        Формирование клавитуры для завершения теста
+        """
+        buttons = [[InlineKeyboardButton(
+                text='Получить результаты',
+                callback_data='1000'
+            )]]
+
         return InlineKeyboardMarkup(inline_keyboard=buttons)
 
     @classmethod
@@ -65,24 +79,26 @@ class UserKeyBoardManager:
             Вернет необходимый объект клавиатуры в зависимости
             от состояния пользователя
         """
+
         # Получим необходимый номер вопроса
         state_manager = StateManager(tg_id)
 
+        if state_manager.number <= 15:
+            # Получим текст вопроса и варианты ответов
+            question = Question().get_question(state_manager.number)
+            print(question)
 
-        # Получим текст вопроса и варианты ответов
-        question = Question.get_question(state_manager.number)
+            if state_manager.number < 6:
+                return (question['question'],
+                        cls.question_about(question['answer_choise']))
 
-        # Если это 6-15 вопросы, то надо убрать уже отвеченные
-        if state_manager.number > 5:
             for key, value in state_manager.priority.items():
                 if value != '0':
-                    question['answer_choise'].pop(int(key))
-
-        if state_manager.number < 6:
-            return (question['question'],
-                    cls.question_about(question['answer_choise']))
-        else:
+                    question['answer_choise'].pop(key)
             return (question['question'],
                     cls.question_test(question['answer_choise']))
+
+        else:
+            return ('Спасибо за ответы! Тест завершен.', cls.result())
 
 

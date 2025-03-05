@@ -1,9 +1,13 @@
 import redis
 from copy import copy
+import pytest
 
-red = redis.Redis(host='localhost', port=6379, db=0)
+
 
 class FSM:
+    red = redis.Redis(host='localhost', port=6379, db=0)
+    red.flushall()
+
     initial_hash: dict = {'number': '1',
                               '1': '0',
                               '2': '0',
@@ -24,7 +28,7 @@ class FSM:
         Инициализация пользователя.
         Он зашел в первый раз
         """
-        red.hset(str(tg_id),
+        cls.red.hset(str(tg_id),
                  mapping=FSM.initial_hash)
 
     @classmethod
@@ -32,7 +36,7 @@ class FSM:
         """
         Вернет текущий номер вопроса пользователя
         """
-        number = red.hget(str(tg_id), 'number')
+        number = cls.red.hget(str(tg_id), 'number')
         if number:
             number = int(number)
         return number
@@ -45,7 +49,7 @@ class FSM:
         current_hash = copy(FSM.initial_hash)
         current_hash['number'] = str(number)
 
-        red.hset(str(tg_id),
+        cls.red.hset(str(tg_id),
                  mapping=current_hash)
 
     @classmethod
@@ -54,12 +58,12 @@ class FSM:
         Переход на следующий вопрос.
         Обнуление ответов - приориетов
         """
-        number = int(red.hget(str(tg_id), 'number'))
+        number = int(cls.red.hget(str(tg_id), 'number'))
         number += 1
         current_hash = copy(FSM.initial_hash)
         current_hash['number'] = str(number)
 
-        red.hset(str(tg_id),
+        cls.red.hset(str(tg_id),
                  mapping=current_hash)
 
     @classmethod
@@ -67,7 +71,7 @@ class FSM:
         """
         Возвращение текущего словаря
         """
-        result = red.hgetall(str(tg_id))
+        result = cls.red.hgetall(str(tg_id))
         return cls.__decoder(result)
 
     @classmethod
@@ -75,8 +79,23 @@ class FSM:
         """
         Установит текущий приоритет
         """
-        red.hset(str(tg_id), str(key), str(priority))
+        cls.red.hset(str(tg_id), str(key), str(priority))
 
     @classmethod
     def has_state(cls, tg_id) -> bool:
-        return red.exists(str(tg_id))
+        return cls.red.exists(str(tg_id))
+
+
+# def test_some():
+#     tg_id = '11111'
+#     if not FSM.has_state(str(tg_id)):
+#         print('FSM.has_state(tg_id)')
+#         # Пользователя нет, надо его восстановить
+#         number = None
+#         if number:
+#             FSM.restore(tg_id, int(number) + 1)
+#         else:
+#             # Пользователь еще вообще не отвечал
+#             FSM.init_state(tg_id)
+#
+#     return FSM.get_data(tg_id)

@@ -2,7 +2,7 @@ import sqlite3
 import os
 import json
 
-DB_NAME = 'form_bot.db'
+DB_NAME = 'database/form_bot.db'
 
 
 def executor(sql: str, args: tuple | None =None):
@@ -206,14 +206,13 @@ class Question(Table):
         return super().select_where(conditions_and, conditions_or)
 
     def get_question(self, number):
-        if not isinstance(number, int):
-            return None
-        else:
-            question: dict = super().select_where(
-                conditions_and=[('number', '=', number)]
-            )[0]
-            # Формат словаря или списка
-            question['answer_choise'] = json.loads(question['answer_choise'])
+        question: dict = super().select_where(
+            conditions_and=[('number', '=', number)]
+        )[0]
+
+        # Формат словаря или списка
+        question['answer_choise'] = json.loads(question['answer_choise'])
+        return question
 
 
 
@@ -235,6 +234,13 @@ class AnswerTest(Table):
         result = executor(sql, (tg_id,))
         return result[0]['max_number'] if result else None
 
+    def save(self, tg_id, number, answer):
+        dct_values = {
+            'tg_id': tg_id,
+            'number': number,
+            'answer': answer}
+        super().insert(dct_values)
+
 
 class Admin(Table):
     table_name = 'Admin'
@@ -251,7 +257,5 @@ class Admin(Table):
         return self.select_all()
 
 if __name__ == '__main__':
-    print(Admin().select_all())
-    print(Question().get_question(2))
     x = 1
 
