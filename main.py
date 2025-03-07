@@ -6,11 +6,15 @@ from aiogram import Bot, Dispatcher
 
 from handlers import (user_handlers)
 from settings import TOKEN
+from database.db_operations import AnswerTest
 
 
 
 # Функция конфигурирования и запуска бота
 async def main():
+    # Удалить перед пушем в прод))
+    at = AnswerTest()
+    at.clear_all()
 
     # Инициализируем бот и диспетчер
     bot = Bot(token=TOKEN)

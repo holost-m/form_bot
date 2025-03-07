@@ -1,5 +1,6 @@
 from aiogram.types import Message
 from copy import copy
+import json
 
 from database.db_operations import (User,
                                     Question,
@@ -56,11 +57,18 @@ class StateManager:
         else:
             # Получим больший приоритет
             max_priority = max(self.priority.values())
+            # выставляем следующий приоритет для записи
             current_priority = int(max_priority) + 1
             FSM.set_priority(tg_id, data, current_priority)
             print('current_priority', current_priority)
             # если ответили на все вопросы то переключаем состояние
             if current_priority == 5:
+                # Для этой категории вопросов сохраняет в БД словарь приоритетов
+                dct_priority = FSM.get_data(tg_id)
+                dct_priority.pop('number')
+                dct_priority = json.dumps(dct_priority)
+
+                AnswerTest().save(tg_id, self.number, dct_priority)
                 self.next_state()
                 print('self.next_state()', self.number)
 

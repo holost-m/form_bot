@@ -177,6 +177,14 @@ class Table:
         # вставка
         executor(insert_query, values)
 
+    def clear_all(self) -> None:
+        """
+            Удаление всех записей из таблицы.
+            :return: None
+        """
+        sql = f"DELETE FROM {self.table_name}"
+        executor(sql)
+
 
 class User(Table):
     table_name = 'User'
@@ -240,6 +248,17 @@ class AnswerTest(Table):
             'number': number,
             'answer': answer}
         super().insert(dct_values)
+
+    def user_result(self, tg_id) -> list[dict]:
+        """
+        Получить ответы пользователя
+
+        """
+        result = super().select_where(
+            conditions_and=[('tg_id', '=', str(tg_id))]
+        )
+        return result
+
 
 
 class Admin(Table):

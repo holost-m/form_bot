@@ -9,6 +9,7 @@ from keyboards.user_keyboards import UserKeyBoardManager
 from service.state_manager import (filter_on_question,
                                    filter_on_result,
                                    StateManager)
+from service.result_builder import UserResult
 
 # Инициализируем роутер для обработки пользовательских сообщений
 router = Router()
@@ -30,7 +31,10 @@ async def process_start_command(message: Message):
     text, reply_markup = UserKeyBoardManager.get_keyboard(tg_id)
 
     # это если надо подменить клавиатуру
-    await message.answer(text=text, reply_markup=reply_markup)
+    await message.answer(
+        text=text,
+        reply_markup=reply_markup
+    )
 
 @router.callback_query(filter_on_question)
 async def process_question(callback: CallbackQuery):
@@ -50,7 +54,10 @@ async def process_question(callback: CallbackQuery):
     text, reply_markup = UserKeyBoardManager.get_keyboard(tg_id)
 
     # Отправили клавиатуру
-    await callback.message.edit_text(text=text, reply_markup=reply_markup)
+    await callback.message.edit_text(
+        text=text,
+        reply_markup=reply_markup
+    )
 
 
 
@@ -59,7 +66,11 @@ async def get_user_result(callback: CallbackQuery):
     """
     Возвращает пользователю результат прохождения теста
     """
+    tg_id: int = callback.message.from_user.id
+    ur = UserResult(tg_id)
+    answer = 'Тест завершен! Определили Ваш ведущий мотив.\n\n'
+    answer += f'{ur.main_motivation_find()}'
 
     await callback.message.answer(
-        text='Результат теста'
+        text=answer
     )
