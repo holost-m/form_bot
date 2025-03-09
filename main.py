@@ -4,7 +4,10 @@ from aiogram import Bot, Dispatcher
 
 # импорт файлов проекта
 
-from handlers import (user_handlers)
+from handlers import (
+    user_handlers,
+    admin_handlers
+)
 from settings import TOKEN
 from database.db_operations import AnswerTest
 
@@ -13,8 +16,8 @@ from database.db_operations import AnswerTest
 # Функция конфигурирования и запуска бота
 async def main():
     # Удалить перед пушем в прод))
-    at = AnswerTest()
-    at.clear_all()
+    # at = AnswerTest()
+    # at.clear_all()
 
     # Инициализируем бот и диспетчер
     bot = Bot(token=TOKEN)
@@ -22,6 +25,7 @@ async def main():
 
     # Регистриуем роутеры в диспетчере
     dp.include_router(user_handlers.router)
+    dp.include_router(admin_handlers.router)
 
 
     print('Bot is running')

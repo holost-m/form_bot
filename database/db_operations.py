@@ -1,8 +1,10 @@
 import sqlite3
 import os
 import json
+from pathlib import Path
 
-DB_NAME = 'database/form_bot.db'
+# Получаем абсолютный путь к базе данных
+DB_NAME = '/home/student/prog/form_bot/database/form_bot.db'
 
 
 def executor(sql: str, args: tuple | None =None):
@@ -234,6 +236,9 @@ class AnswerTest(Table):
     ]
 
     def get_last_answer(self, tg_id):
+        """
+            Последний вопрос пользователя, на которой он ответил
+        """
         sql = f"""
         SELECT MAX("number") AS max_number
         FROM {self.table_name}
@@ -243,10 +248,14 @@ class AnswerTest(Table):
         return result[0]['max_number'] if result else None
 
     def save(self, tg_id, number, answer):
+        """
+        Сохранить ответ пользователя на вопрос
+        """
         dct_values = {
             'tg_id': tg_id,
             'number': number,
-            'answer': answer}
+            'answer': answer
+        }
         super().insert(dct_values)
 
     def user_result(self, tg_id) -> list[dict]:
@@ -259,6 +268,68 @@ class AnswerTest(Table):
         )
         return result
 
+class AnswerTestTotalResult(AnswerTest):
+    def total_count_user(self):
+        """
+            Количество пользователей, которые ответили на анкету
+        """
+        sql = f"""
+            SELECT COUNT(DISTINCT "tg_id") AS total_user
+            FROM {self.table_name}
+        """
+        return executor(sql)
+
+    def group_category(self, number):
+        """
+            Формирует категории ответов 1-5
+        """
+        sql = f"""
+            SELECT "answer", COUNT(DISTINCT "tg_id") AS total_user
+            FROM {self.table_name}
+            WHERE "number" = ?
+            GROUP BY "answer"
+        """
+        return executor(sql, (number,))
+
+    def total_count_priority(self):
+        """
+        Общее количество приоритетов
+        """
+        sql = f"""
+            SELECT 
+        json_extract("answer", '$.1') AS priority_1,
+        json_extract("answer", '$.2') AS priority_2,
+        json_extract("answer", '$.3') AS priority_3,
+        json_extract("answer", '$.4') AS priority_4,
+        json_extract("answer", '$.5') AS priority_5
+        FROM {self.table_name}
+        WHERE "number" > 5 AND "number" < 16
+        LIMIT 10;
+        """
+        return executor(sql)
+
+    def ready_users(self):
+        sql = f"""
+                SELECT "tg_id"
+                FROM {self.table_name}
+                GROUP BY "tg_id"
+                HAVING COUNT(*) = 15
+        """
+        return executor(sql)
+
+    def format_result(self, pagination=(1500, 0)):
+        """
+        LIMIT - макс. количество строк, которые нужно вернуть.
+        OFFSET - сколько строк нужно пропустить.
+        """
+        sql = f"""
+            SELECT *
+            FROM {self.table_name}
+            ORDER BY "tg_id", "number"
+            LIMIT ? OFFSET ?;
+        """
+
+        return executor(sql, pagination)
 
 
 class Admin(Table):

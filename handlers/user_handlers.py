@@ -1,10 +1,7 @@
 from aiogram import Router
-from aiogram import Bot
-from aiogram import F
-from aiogram.filters import Command, CommandStart
 from aiogram.types import Message
 from aiogram.types import CallbackQuery
-
+from aiogram.filters import CommandStart
 from keyboards.user_keyboards import UserKeyBoardManager
 from service.state_manager import (filter_on_question,
                                    filter_on_result,
